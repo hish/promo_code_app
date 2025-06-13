@@ -1,6 +1,16 @@
 #!/bin/sh
 set -e
 
+echo "Running composer install if needed..."
+composer install --no-interaction --prefer-dist --optimize-autoloader
+
+
+echo "Generating application key if not set..."
+if ! grep -q "^APP_KEY=" .env || [ -z "$(grep "^APP_KEY=" .env | cut -d '=' -f2)" ]; then
+    php artisan key:generate
+fi
+
+
 echo "Waiting for MySQL to be ready..."
 if [ "$DB_HOST" != "" ]; then
     # Wait for the database to be ready

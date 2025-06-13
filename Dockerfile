@@ -29,7 +29,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 COPY . /app
 
 # Install PHP dependencies via Composer
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+#RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Expose port 8000 for Laravel development server
 EXPOSE 8000
