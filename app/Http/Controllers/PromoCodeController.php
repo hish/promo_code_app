@@ -17,18 +17,18 @@ class PromoCodeController extends Controller
     public function store(PromoCodeRequest $request)
     {
         $data = $request->validated();
-        dd($data);
+
         $data['code'] = $data['code'] ?? strtoupper(Str::random(5));
 
         $promo_code = PromoCode::create($data);
 
         if (!empty($data['user_ids'])) {
-            $promoCode->users()->sync($data['user_ids']);
+            $promo_code->users()->sync($data['user_ids']);
         }
 
         return response()->json([
             'message' => 'Promo code created successfully',
-            'data' => $promoCode,
+            'data' => $promo_code,
         ], 201);
 
     }
