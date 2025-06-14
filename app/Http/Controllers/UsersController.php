@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Enum;
 use App\Models\User;
+use App\Enums\UserRole;
 
 class UsersController extends Controller
 {
@@ -14,7 +16,8 @@ class UsersController extends Controller
         $validator = Validator::make($request->all(), [
             "name" => "required|string",
             "email" => "required|string|email|unique:users",
-            "password" => "required|confirmed" // password_confirmation
+            "password" => "required|confirmed",
+            'role' => ['required', new Enum(UserRole::class)],
         ]);
  
         if ($validator->fails()) {
@@ -29,7 +32,8 @@ class UsersController extends Controller
         User::create([
             "name" => $request->name,
             "email" => $request->email,
-            "password" => bcrypt($request->password)
+            "password" => bcrypt($request->password),
+            "role" => $request->role
         ]);
  
         // Response
