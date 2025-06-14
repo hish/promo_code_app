@@ -66,13 +66,9 @@ class UsersController extends Controller
         if (!empty($user)) {
  
             if (Hash::check($request->password, $user->password)) {
-                $abilities = [
-                    'admin' => ['create-code'],
-                    'user' => ['use-code'] 
-                ];
 
                 // Login is ok
-                $tokenInfo = $user->createToken("Promo Code App", $abilities[$user->role->value]);
+                $tokenInfo = $user->createToken("Promo Code Api");
  
                 $token = $tokenInfo->plainTextToken; // Token value
  
