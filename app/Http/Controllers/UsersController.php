@@ -66,9 +66,13 @@ class UsersController extends Controller
         if (!empty($user)) {
  
             if (Hash::check($request->password, $user->password)) {
- 
+                $abilities = [
+                    'admin' => ['create-code'],
+                    'user' => ['use-code'] 
+                ];
+
                 // Login is ok
-                $tokenInfo = $user->createToken("promo_code_app");
+                $tokenInfo = $user->createToken("Promo Code App", $abilities[$user->role->value]);
  
                 $token = $tokenInfo->plainTextToken; // Token value
  
@@ -93,7 +97,6 @@ class UsersController extends Controller
         }
     }
 
-    // Profile (GET, Auth Token)
     public function profile()
     {
         $userData = auth()->user();
@@ -105,10 +108,8 @@ class UsersController extends Controller
         ]);
     }
  
-    // Logout (GET, Auth Token)
     public function logout()
     {
-        // To get all tokens of logged in user and delete that
         request()->user()->tokens()->delete();
  
         return response()->json([
