@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('promo_codes', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
-            $table->enum('type', ['percentage', 'value']);
+            $table->string('type');
             $table->decimal('amount', 8, 2);
             $table->integer('max_usage')->nullable();
             $table->integer('user_max_usage')->nullable();

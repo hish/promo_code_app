@@ -13,7 +13,7 @@ class PromoCode extends Model
 
     protected $dates = ['expires_at'];
 
-    public function users(): BelongToMany
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
     }
