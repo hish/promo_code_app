@@ -26,7 +26,7 @@ class UsersController extends Controller
                 'status'  => false,
                 'message' => $errorMessage,
             ];
-            return response()->json($response, 401);
+            return response()->json($response, 422);
         }
  
         User::create([
@@ -56,7 +56,7 @@ class UsersController extends Controller
                 'status'  => false,
                 'message' => $errorMessage,
             ];
-            return response()->json($response, 401);
+            return response()->json($response, 422);
         }
  
         // Check user by email
@@ -82,14 +82,14 @@ class UsersController extends Controller
                 return response()->json([
                     "status" => false,
                     "message" => "Password didn't match."
-                ]);
+                ], 422);
             }
         } else {
  
             return response()->json([
                 "status" => false,
                 "message" => "Invalid credentials"
-            ]);
+            ], 422);
         }
     }
 

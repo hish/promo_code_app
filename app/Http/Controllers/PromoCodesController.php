@@ -29,8 +29,8 @@ class PromoCodesController extends Controller
             'max_usage' => 'nullable|integer|min:1',
             'user_max_usage' => 'nullable|integer|min:1',
             'expires_at' => 'nullable|date|after:now',
-            'user_ids' => 'array',
-            'user_ids.*' => 'exists:users,id',
+            'user_ids' => 'required|array|min:1',
+            'user_ids.*' => 'required|exists:users,id',
         ]);
 
         if ($validator->fails()) {
@@ -39,7 +39,7 @@ class PromoCodesController extends Controller
                 'status'  => false,
                 'message' => $errorMessage,
             ];
-            return response()->json($response, 401);
+            return response()->json($response, 422);
         }
 
         $invalidUsers = User::whereIn('id', $request->user_ids)
@@ -49,9 +49,10 @@ class PromoCodesController extends Controller
 
         if (!empty($invalidUsers)) {
             return response()->json([
+                'status'  => false,
                 'message' => 'Some selected users are not regular users.',
                     'invalid_user_ids' => $invalidUsers
-            ], 401);
+            ], 422);
         }
 
         $promo_code = PromoCode::create([
@@ -87,7 +88,7 @@ class PromoCodesController extends Controller
                 'status'  => false,
                 'message' => $errorMessage,
             ];
-            return response()->json($response, 401);
+            return response()->json($response, 422);
         }
 
         $code = PromoCode::where("code", $request->code)->first();
@@ -101,7 +102,7 @@ class PromoCodesController extends Controller
                 'status'  => false,
                 'message' => "The selected code is expired",
             ];
-            return response()->json($response, 401);
+            return response()->json($response, 422);
         }
 
         //Check is available for the requested user
@@ -110,7 +111,7 @@ class PromoCodesController extends Controller
                 'status'  => false,
                 'message' => "The selected code invalid for the current user",
             ];
-            return response()->json($response, 401);
+            return response()->json($response, 422);
         }
 
         //Check number of usages
@@ -119,7 +120,7 @@ class PromoCodesController extends Controller
                 'status'  => false,
                 'message' => "The selected code exceeded max usage",
             ];
-            return response()->json($response, 401);
+            return response()->json($response, 422);
         }
 
         //Check number of usages by the requested user
@@ -129,9 +130,10 @@ class PromoCodesController extends Controller
                 'status'  => false,
                 'message' => "The selected code exceeded number of usage for the current user",
             ];
-            return response()->json($response, 401);
+            return response()->json($response, 422);
         }
-        
+        $code->usage += 1;
+        $code->save();
         $code->users()->updateExistingPivot($auth_user->id, ['times_redeemed' => $current_used + 1]);
         $discount = $code->calculate_discount($request->price);
         return response()->json([

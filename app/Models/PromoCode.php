@@ -4,11 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use App\Enums\PromoCodeType;
 
 class PromoCode extends Model
 {
+    use HasFactory;
+    
     protected $fillable = [
         "code", "type", "amount", "usage", "max_usage", "user_max_usage", "expires_at"
     ];
