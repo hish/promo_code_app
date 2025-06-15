@@ -27,7 +27,9 @@ fi
 touch /tmp/database.sqlite
 chmod 666 /tmp/database.sqlite
 php artisan migrate --env=testing
-#php artisan key:generate --env=testing
+if ! grep -q "^APP_KEY=" .env.testing || [ -z "$(grep "^APP_KEY=" .env.testing | cut -d '=' -f2)" ]; then
+  php artisan key:generate --env=testing
+fi
 php artisan test
 
 # Execute the provided command (which is typically php-fpm)
