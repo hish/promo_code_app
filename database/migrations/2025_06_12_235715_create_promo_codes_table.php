@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->string('type');
             $table->decimal('amount', 8, 2);
+            $table->integer("usage")->default(0);
             $table->integer('max_usage')->nullable();
             $table->integer('user_max_usage')->nullable();
             $table->dateTime('expires_at')->nullable();

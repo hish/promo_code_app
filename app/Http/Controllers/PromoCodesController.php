@@ -13,6 +13,7 @@ use Illuminate\Validation\Rules\Enum;
 use App\Enums\PromoCodeType;
 use App\Enums\UserRole;
 use App\Http\Resources\PromoCodeResource;
+use Illuminate\Validation\Rule;
 
 
 class PromoCodesController extends Controller
@@ -22,13 +23,13 @@ class PromoCodesController extends Controller
     public function store(Request $request)
     {
         $validator =  Validator::make($request->all(), [
-            'code' => 'nullable|string|unique:promo_codes,code',
+            'code' => 'nullable|string|min:5|unique:promo_codes,code',
             'type' => ['required', new Enum(PromoCodeType::class)],
-            'amount' => 'required|numeric|min:0',
+            'amount' => 'required|numeric|min:0.1',
             'max_usage' => 'nullable|integer|min:1',
             'user_max_usage' => 'nullable|integer|min:1',
             'expires_at' => 'nullable|date|after:now',
-            'user_ids' => 'nullable|array',
+            'user_ids' => 'array',
             'user_ids.*' => 'exists:users,id',
         ]);
 
@@ -54,7 +55,7 @@ class PromoCodesController extends Controller
         }
 
         $promo_code = PromoCode::create([
-            "code" => $request->code ?? strtoupper(Str::random(5)),
+            "code" => $request->code ? strtoupper($request->code): strtoupper(Str::random(5)),
             "type" => $request->type,
             "amount" => $request->amount,
             "max_usage" => $request->max_usage,
@@ -75,6 +76,52 @@ class PromoCodesController extends Controller
 
     public function redeem(Request $request)
     {
+        $validator =  Validator::make($request->all(), [
+            'price' => 'required|numeric|min:1',
+            'code' => ['required', Rule::exists('promo_codes', 'code')],
+        ]);
+
+        if ($validator->fails()) {
+            $errorMessage = $validator->errors()->first();
+            $response = [
+                'status'  => false,
+                'message' => $errorMessage,
+            ];
+            return response()->json($response, 401);
+        }
+
+        $code = PromoCode::where("code", $request->code)->first();
+
+        //Check expiry
+        if($code->expires_at < now()) {
+            $response = [
+                'status'  => false,
+                'message' => "The selected code is expired",
+            ];
+            return response()->json($response, 401);
+        }
+
+        //Check is available for the requested user
+        $auth_user = auth()->user();
+        $users = $code->users->pluck('id')->toArray();
+    
+        if (!in_array($auth_user->id, $users)){
+            $response = [
+                'status'  => false,
+                'message' => "The selected code invalid for the current user",
+            ];
+            return response()->json($response, 401);
+        }
+
+        //Check number of usages
+        if ($code->usage >= $code->max_usage) {
+            $response = [
+                'status'  => false,
+                'message' => "The selected code exceeded max usage",
+            ];
+            return response()->json($response, 401);
+        }
+
         return response()->json([
             'message' => "redeem Promo Code",
             'data' => []

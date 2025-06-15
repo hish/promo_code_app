@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class PromoCode extends Model
 {
     protected $fillable = [
-        "code", "type", "amount", "max_usage", "user_max_usage", "expires_at"
+        "code", "type", "amount", "usage", "max_usage", "user_max_usage", "expires_at"
     ];
 
     protected $dates = ['expires_at'];
