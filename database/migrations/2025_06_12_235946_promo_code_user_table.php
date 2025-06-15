@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('promo_code_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->integer('times_redeemed')->default(0);
         });
 
     }

@@ -91,6 +91,9 @@ class PromoCodesController extends Controller
         }
 
         $code = PromoCode::where("code", $request->code)->first();
+        $auth_user = auth()->user();
+        $code_user = $code->users()->where('user_id', $auth_user->id)->first();
+        //dd($code_user);
 
         //Check expiry
         if($code->expires_at < now()) {
@@ -102,10 +105,7 @@ class PromoCodesController extends Controller
         }
 
         //Check is available for the requested user
-        $auth_user = auth()->user();
-        $users = $code->users->pluck('id')->toArray();
-    
-        if (!in_array($auth_user->id, $users)){
+        if (!$code_user){
             $response = [
                 'status'  => false,
                 'message' => "The selected code invalid for the current user",
@@ -122,9 +122,25 @@ class PromoCodesController extends Controller
             return response()->json($response, 401);
         }
 
+        //Check number of usages by the requested user
+        $current_used = $code_user->pivot->times_redeemed;
+        if($current_used >= $code->user_max_usage) {
+            $response = [
+                'status'  => false,
+                'message' => "The selected code exceeded number of usage for the current user",
+            ];
+            return response()->json($response, 401);
+        }
+        
+        $code->users()->updateExistingPivot($auth_user->id, ['times_redeemed' => $current_used + 1]);
+        $discount = $code->calculate_discount($request->price);
         return response()->json([
             'message' => "redeem Promo Code",
-            'data' => []
+            'data' => [
+                "price" => $request->price,
+                "promocode_discounted_amount" => $discount,
+                "final_price" => round($request->price - $discount, 2)
+            ]
         ], 200);
     }
 
