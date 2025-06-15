@@ -23,5 +23,9 @@ if [ "$DB_HOST" != "" ]; then
     php artisan migrate --force
 fi
 
+# RUN Unit test
+php artisan key:generate --env=testing
+php artisan test
+
 # Execute the provided command (which is typically php-fpm)
 exec "$@"
