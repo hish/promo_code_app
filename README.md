@@ -16,7 +16,7 @@ It exposes two main API endpoints:
 1. **Clone the repository and navigate into the project directory:**
 
 ```bash
-   git clone https://github.com/your-username/promo-code-app.git
+   git clone git@github.com:hish/promo_code_app.git
    cd promo-code-app
 ```
 2. **Copy the example environment file and keep its contents unchanged:**
