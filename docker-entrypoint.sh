@@ -24,7 +24,10 @@ if [ "$DB_HOST" != "" ]; then
 fi
 
 # RUN Unit test
-php artisan key:generate --env=testing
+touch /tmp/database.sqlite
+chmod 666 /tmp/database.sqlite
+php artisan migrate --env=testing
+#php artisan key:generate --env=testing
 php artisan test
 
 # Execute the provided command (which is typically php-fpm)
